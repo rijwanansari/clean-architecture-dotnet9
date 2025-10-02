@@ -37,9 +37,18 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 
             return Result<Guid>.Success(product.Id);
         }
-        catch (Exception ex)
+        catch (ArgumentException)
         {
-            return Result<Guid>.Failure(ex.Message);
+            return Result<Guid>.Failure("Invalid product data provided.");
+        }
+        catch (InvalidOperationException)
+        {
+            return Result<Guid>.Failure("Operation could not be completed. Please check your request.");
+        }
+        catch (Exception)
+        {
+            // Optionally log the exception here
+            return Result<Guid>.Failure("An unexpected error occurred. Please try again later.");
         }
     }
 }

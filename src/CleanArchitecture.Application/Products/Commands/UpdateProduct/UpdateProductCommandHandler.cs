@@ -34,9 +34,18 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
 
             return Result<bool>.Success(true);
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
-            return Result<bool>.Failure(ex.Message);
+            return Result<bool>.Failure("Invalid argument: " + ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Result<bool>.Failure("Operation could not be completed: " + ex.Message);
+        }
+        catch (Exception)
+        {
+            // Optionally log the exception here if a logger is available
+            return Result<bool>.Failure("An unexpected error occurred. Please try again later.");
         }
     }
 
