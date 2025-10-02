@@ -1,4 +1,4 @@
-namespace CleanArchitecture.Domain.Exceptions;
+namespace CleanArchitecture.Domain.Enumerators;
 
 public enum PaymentMethod
 {
