@@ -9,7 +9,7 @@ namespace CleanArchitecture.Domain.Entities;
 
 public class Order : BaseEntity
 {
-    public string OrderNumber { get; private set; }
+    public string OrderNumber { get; private set; } = string.Empty;
     public Guid CustomerId { get; private set; }
     public Customer Customer { get; private set; }
     public OrderStatus Status { get; private set; }
