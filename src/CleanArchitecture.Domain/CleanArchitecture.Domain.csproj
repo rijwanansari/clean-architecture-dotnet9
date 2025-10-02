@@ -7,11 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Constants\" />
     <Folder Include="DomainEvents\" />
     <Folder Include="Enumerators\" />
     <Folder Include="Exceptions\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
 
 </Project>
