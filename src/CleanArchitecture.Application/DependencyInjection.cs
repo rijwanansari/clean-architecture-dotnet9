@@ -16,6 +16,8 @@ public static class DependencyInjection
             throw new ArgumentNullException(nameof(services));
         }
 
+        // Application Services
+
         var assembly = Assembly.GetExecutingAssembly();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
@@ -23,9 +25,6 @@ public static class DependencyInjection
 
         services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-
-
-        // Application Services
 
         return services;
     }
