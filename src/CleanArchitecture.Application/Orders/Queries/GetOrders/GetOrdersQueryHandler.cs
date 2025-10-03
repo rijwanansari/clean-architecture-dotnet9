@@ -26,7 +26,7 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, Result<Orde
             order.Id,
             order.OrderNumber,
             order.CustomerId,
-            order.Customer.GetFullName(),
+            order.Customer?.GetFullName() ?? string.Empty,
             order.Status,
             order.GetTotalAmount().Amount,
             order.CreatedAt
