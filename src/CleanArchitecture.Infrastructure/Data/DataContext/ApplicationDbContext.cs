@@ -24,8 +24,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-
-
         var entities = ChangeTracker.Entries<BaseEntity>()
             .Where(e => e.State == EntityState.Modified)
             .Select(e => e.Entity);
