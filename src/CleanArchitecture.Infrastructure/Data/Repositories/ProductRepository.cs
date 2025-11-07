@@ -35,13 +35,22 @@ public class ProductRepository : IProductRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<(List<Product> Items, int TotalCount)> GetPagedAsync(
-        int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<(List<Product> Items, int? TotalCount)> GetPagedAsync(
+        int page, int pageSize, bool includeTotalCount = false, CancellationToken cancellationToken = default)
     {
+        if (page < 1)
+            throw new ArgumentOutOfRangeException(nameof(page), "Page must be greater than or equal to 1.");
+        if (pageSize <= 0)
+            throw new ArgumentOutOfRangeException(nameof(pageSize), "Page size must be greater than 0.");
+
         var query = _context.Products.Where(p => p.IsActive);
-        
-        var totalCount = await query.CountAsync(cancellationToken);
-        
+
+        int? totalCount = null;
+        if (includeTotalCount)
+        {
+            totalCount = await query.CountAsync(cancellationToken);
+        }
+
         var items = await query
             .OrderBy(p => p.Name)
             .Skip((page - 1) * pageSize)
@@ -65,5 +74,4 @@ public class ProductRepository : IProductRepository
     {
         _context.Products.Remove(product);
     }
-
 }

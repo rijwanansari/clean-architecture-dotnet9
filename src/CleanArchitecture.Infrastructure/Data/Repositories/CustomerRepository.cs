@@ -23,8 +23,9 @@ public class CustomerRepository : ICustomerRepository
 
     public async Task<Customer?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
+        var normalizedEmail = email.ToLowerInvariant();
         return await _context.Customers
-            .FirstOrDefaultAsync(c => c.Email.Value == email.ToLowerInvariant(), cancellationToken);
+            .FirstOrDefaultAsync(c => c.Email.Value == normalizedEmail, cancellationToken);
     }
 
     public async Task<List<Customer>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -39,7 +40,6 @@ public class CustomerRepository : ICustomerRepository
 
     public void Update(Customer customer)
     {
-        _context.Customers.Update(customer);
     }
 
 }

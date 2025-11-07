@@ -43,10 +43,15 @@ public class OrderRepository : IOrderRepository
     public async Task<(List<Order> Items, int TotalCount)> GetPagedAsync(
         int page, int pageSize, CancellationToken cancellationToken = default)
     {
+        if (page < 1)
+            throw new ArgumentOutOfRangeException(nameof(page), "Page must be greater than or equal to 1.");
+        if (pageSize <= 0)
+            throw new ArgumentOutOfRangeException(nameof(pageSize), "Page size must be greater than 0.");
+
         var query = _context.Orders.Include(o => o.Customer);
-        
+
         var totalCount = await query.CountAsync(cancellationToken);
-        
+
         var items = await query
             .OrderByDescending(o => o.CreatedAt)
             .Skip((page - 1) * pageSize)
@@ -54,6 +59,7 @@ public class OrderRepository : IOrderRepository
             .ToListAsync(cancellationToken);
 
         return (items, totalCount);
+
     }
 
     public async Task AddAsync(Order order, CancellationToken cancellationToken = default)
