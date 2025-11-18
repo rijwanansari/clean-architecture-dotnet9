@@ -22,16 +22,16 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .IsRequired()
             .HasMaxLength(100);
 
-        // builder.OwnsOne(p => p.Price, price =>
-        // {
-        //     price.Property(m => m.Amount)
-        //         .HasColumnName("Price")
-        //         .HasPrecision(18, 2);
+        builder.OwnsOne(p => p.Price, price =>
+        {
+            price.Property(m => m.Amount)
+                .HasColumnName("Price")
+                .HasPrecision(18, 2);
 
-        //     price.Property(m => m.Currency)
-        //         .HasColumnName("Currency")
-        //         .HasMaxLength(3);
-        // });
+            price.Property(m => m.Currency)
+                .HasColumnName("Currency")
+                .HasMaxLength(3);
+        });
 
         builder.Property(p => p.StockQuantity)
             .IsRequired();
