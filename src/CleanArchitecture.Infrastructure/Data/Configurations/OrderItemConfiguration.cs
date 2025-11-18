@@ -15,16 +15,16 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
             .IsRequired()
             .HasMaxLength(200);
 
-        // builder.OwnsOne(oi => oi.UnitPrice, price =>
-        //     {
-        //         price.Property(p => p.Amount)
-        //             .HasColumnName("UnitPrice")
-        //             .HasPrecision(18, 2);
+        builder.OwnsOne(oi => oi.UnitPrice, price =>
+        {
+            price.Property(p => p.Amount)
+                .HasColumnName("UnitPrice")
+                .HasPrecision(18, 2);
 
-        //         price.Property(p => p.Currency)
-        //             .HasColumnName("Currency")
-        //             .HasMaxLength(3);
-        //     });
+            price.Property(p => p.Currency)
+                .HasColumnName("Currency")
+                .HasMaxLength(3);
+        });
 
         builder.Property(oi => oi.Quantity)
             .IsRequired();

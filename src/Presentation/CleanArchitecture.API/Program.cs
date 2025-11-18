@@ -1,8 +1,19 @@
+using CleanArchitecture.Infrastructure.Data.DataContext;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Register ApplicationDbContext with SQL Server provider using connection string from configuration
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                       ?? builder.Configuration["ConnectionStrings:DefaultConnection"]
+                       ?? "Server=(localdb)\\mssqllocaldb;Database=CleanArchDb;Trusted_Connection=True;MultipleActiveResultSets=true";
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 
