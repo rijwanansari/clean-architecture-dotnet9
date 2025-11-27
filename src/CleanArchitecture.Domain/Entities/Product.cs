@@ -45,7 +45,7 @@ public class Product : BaseEntity
         Description = description;
         Price = price;
         Category = category;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt();
     }
 
     public void UpdateStock(int quantity)
@@ -54,19 +54,19 @@ public class Product : BaseEntity
             throw new InsufficientStockException($"Insufficient stock for product {Name}");
 
         StockQuantity += quantity;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt();
     }
 
     public void Deactivate()
     {
         IsActive = false;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt();
     }
 
     public void Activate()
     {
         IsActive = true;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt();
     }
 
 }

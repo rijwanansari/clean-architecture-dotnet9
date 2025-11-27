@@ -37,7 +37,7 @@ public class OrderItem : BaseEntity
             throw new ArgumentException("Quantity must be greater than zero", nameof(quantity));
 
         Quantity = quantity;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt();
     }
 
     public Money GetSubtotal() => UnitPrice.Multiply(Quantity);

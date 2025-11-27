@@ -22,18 +22,5 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         base.OnModelCreating(modelBuilder);
     }
 
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        var entities = ChangeTracker.Entries<BaseEntity>()
-            .Where(e => e.State == EntityState.Modified)
-            .Select(e => e.Entity);
-
-        foreach (var entity in entities)
-        {
-            entity.UpdatedAt = DateTime.UtcNow;
-        }
-
-        return await base.SaveChangesAsync(cancellationToken);
-    }  
-
+    // SaveChangesAsync override removed - timestamp updates now handled by AuditableEntityInterceptor
 }
