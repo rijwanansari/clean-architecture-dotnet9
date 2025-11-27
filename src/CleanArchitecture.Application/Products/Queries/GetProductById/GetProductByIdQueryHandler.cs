@@ -1,6 +1,6 @@
 using System;
 using CleanArchitecture.Application.Common;
-using CleanArchitecture.Application.Products.Queries.GetProducts;
+using CleanArchitecture.Application.DTOs.Products;
 using CleanArchitecture.Domain.Repositories;
 using MediatR;
 
@@ -29,7 +29,8 @@ public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, R
             product.Price.Currency,
             product.StockQuantity,
             product.Category,
-            product.IsActive
+            product.IsActive,
+            product.CreatedAt
         );
 
         return Result<ProductDto>.Success(dto);

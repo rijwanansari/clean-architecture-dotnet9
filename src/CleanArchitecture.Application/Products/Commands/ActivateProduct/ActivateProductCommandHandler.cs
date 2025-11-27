@@ -1,0 +1,44 @@
+using CleanArchitecture.Application.Abstractions.Data;
+using CleanArchitecture.Application.Common;
+using CleanArchitecture.Domain.Repositories;
+using MediatR;
+
+namespace CleanArchitecture.Application.Products.Commands.ActivateProduct;
+
+public class ActivateProductCommandHandler : IRequestHandler<ActivateProductCommand, Result<bool>>
+{
+    private readonly IProductRepository _productRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ActivateProductCommandHandler(
+        IProductRepository productRepository,
+        IUnitOfWork unitOfWork)
+    {
+        _productRepository = productRepository;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<Result<bool>> Handle(ActivateProductCommand request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken);
+            if (product == null)
+                return Result<bool>.Failure($"Product with ID {request.ProductId} not found");
+
+            if (product.IsActive)
+                return Result<bool>.Failure("Product is already active");
+
+            product.Activate();
+            
+            _productRepository.Update(product);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure(ex.Message);
+        }
+    }
+}

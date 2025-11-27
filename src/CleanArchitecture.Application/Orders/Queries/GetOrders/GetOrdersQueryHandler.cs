@@ -1,11 +1,13 @@
 using System;
 using CleanArchitecture.Application.Common;
+using CleanArchitecture.Application.DTOs.Common;
+using CleanArchitecture.Application.DTOs.Orders;
 using CleanArchitecture.Domain.Repositories;
 using MediatR;
 
 namespace CleanArchitecture.Application.Orders.Queries.GetOrders;
 
-public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, Result<OrderListResponse>>
+public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, Result<PagedResponse<OrderDto>>>
 {
     private readonly IOrderRepository _orderRepository;
 
@@ -14,7 +16,7 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, Result<Orde
         _orderRepository = orderRepository;
     }
 
-    public async Task<Result<OrderListResponse>> Handle(GetOrdersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedResponse<OrderDto>>> Handle(GetOrdersQuery request, CancellationToken cancellationToken)
     {
         var (orders, totalCount) = await _orderRepository.GetPagedAsync(
             request.Page,
@@ -29,11 +31,12 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, Result<Orde
             order.Customer?.GetFullName() ?? string.Empty,
             order.Status,
             order.GetTotalAmount().Amount,
+            order.GetTotalAmount().Currency,
             order.CreatedAt
         )).ToList();
 
-        var response = new OrderListResponse(orderDtos, totalCount, request.Page, request.PageSize);
-        return Result<OrderListResponse>.Success(response);
+        var response = new PagedResponse<OrderDto>(orderDtos, totalCount, request.Page, request.PageSize);
+        return Result<PagedResponse<OrderDto>>.Success(response);
     }
 
 }
