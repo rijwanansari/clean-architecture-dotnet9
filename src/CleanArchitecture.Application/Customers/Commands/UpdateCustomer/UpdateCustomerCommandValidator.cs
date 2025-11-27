@@ -57,8 +57,31 @@ public class UpdateCustomerCommandValidator : AbstractValidator<UpdateCustomerCo
             RuleFor(x => x.Address.ZipCode)
                 .NotEmpty()
                 .WithMessage("Zip code is required")
-                .Matches(@"^\d{5}(-\d{4})?$")
-                .WithMessage("Invalid zip code format");
+                .Must((customer, zipCode) =>
+                {
+                    if (string.IsNullOrWhiteSpace(zipCode) || customer?.Address?.Country == null)
+                        return false;
+                    var country = customer.Address.Country.Trim().ToUpperInvariant();
+                    switch (country)
+                    {
+                        case "US":
+                        case "USA":
+                        case "UNITED STATES":
+                            return System.Text.RegularExpressions.Regex.IsMatch(zipCode, @"^\d{5}(-\d{4})?$");
+                        case "CA":
+                        case "CAN":
+                        case "CANADA":
+                            return System.Text.RegularExpressions.Regex.IsMatch(zipCode, @"^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$");
+                        case "GB":
+                        case "UK":
+                        case "UNITED KINGDOM":
+                            return System.Text.RegularExpressions.Regex.IsMatch(zipCode, @"^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$");
+                        default:
+                            // Allow alphanumeric postal codes, 3-12 chars, for other countries
+                            return System.Text.RegularExpressions.Regex.IsMatch(zipCode, @"^[A-Za-z0-9\- ]{3,12}$");
+                    }
+                })
+                .WithMessage("Invalid zip/postal code format for the specified country.");
 
             RuleFor(x => x.Address.Country)
                 .NotEmpty()
