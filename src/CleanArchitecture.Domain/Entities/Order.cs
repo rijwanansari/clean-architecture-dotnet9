@@ -11,7 +11,7 @@ public class Order : BaseEntity
 {
     public string OrderNumber { get; private set; } = string.Empty;
     public Guid CustomerId { get; private set; }
-    public Customer Customer { get; private set; }
+    public Customer? Customer { get; init; }
     public OrderStatus Status { get; private set; }
     public PaymentMethod PaymentMethod { get; private set; }
     public Address ShippingAddress { get; private set; }
@@ -64,7 +64,7 @@ public class Order : BaseEntity
             _items.Add(OrderItem.Create(Id, product.Id, product.Name, product.Price, quantity));
         }
 
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt();
     }
 
     public Money GetTotalAmount()
@@ -82,7 +82,7 @@ public class Order : BaseEntity
             throw new DomainException($"Cannot change status of {Status} order");
 
         Status = newStatus;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt();
 
         if (newStatus == OrderStatus.Delivered)
         {
@@ -97,7 +97,7 @@ public class Order : BaseEntity
             throw new DomainException("Cannot cancel delivered order");
 
         Status = OrderStatus.Cancelled;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt();
     }
 
     private static string GenerateOrderNumber()

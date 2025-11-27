@@ -45,7 +45,7 @@ public class Customer : BaseEntity
         LastName = lastName;
         PhoneNumber = phoneNumber;
         Address = address;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt();
     }
 
     public string GetFullName() => $"{FirstName} {LastName}";
