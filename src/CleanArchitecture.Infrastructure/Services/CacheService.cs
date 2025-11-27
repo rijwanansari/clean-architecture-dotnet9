@@ -11,22 +11,15 @@ public class CacheService : ICacheService
 
     public Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
     {
-        while (true)
+        if (_cache.TryGetValue(key, out var entry))
         {
-            if (_cache.TryGetValue(key, out var entry))
+            if (entry.ExpiresAt == null || entry.ExpiresAt > DateTime.UtcNow)
             {
-                // Check expiration
-                if (entry.ExpiresAt == null || entry.ExpiresAt > DateTime.UtcNow)
-                {
-                    return Task.FromResult(JsonSerializer.Deserialize<T>(entry.Value));
-                }
-                // Try to remove only if the entry is still the same
-                _cache.TryRemove(key, out var removedEntry);
-                // If removedEntry is null or not the same, another thread updated it, so retry
-                continue;
+                return Task.FromResult(JsonSerializer.Deserialize<T>(entry.Value));
             }
-            return Task.FromResult<T?>(default);
+            _cache.TryRemove(key, out _);
         }
+        return Task.FromResult<T?>(default);
     }
 
     public Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, 
