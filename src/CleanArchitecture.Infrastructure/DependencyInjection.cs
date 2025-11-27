@@ -4,7 +4,7 @@ using CleanArchitecture.Application.Abstractions.Common;
 using CleanArchitecture.Application.Abstractions.Data;
 using CleanArchitecture.Application.Abstractions.Email;
 using CleanArchitecture.Application.Abstractions.Messaging;
-using CleanArchitecture.Domain.Entities.Repositories;
+using CleanArchitecture.Domain.Repositories;
 using CleanArchitecture.Infrastructure.BackgroundServices;
 using CleanArchitecture.Infrastructure.Data.DataContext;
 using CleanArchitecture.Infrastructure.Data.Interceptors;

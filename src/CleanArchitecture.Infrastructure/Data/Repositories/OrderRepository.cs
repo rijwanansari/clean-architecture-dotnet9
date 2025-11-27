@@ -1,7 +1,7 @@
 using System;
 using CleanArchitecture.Application.Abstractions.Data;
 using CleanArchitecture.Domain.Entities;
-using CleanArchitecture.Domain.Entities.Repositories;
+using CleanArchitecture.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace CleanArchitecture.Infrastructure.Data.Repositories;
@@ -16,6 +16,14 @@ public class OrderRepository : IOrderRepository
     }
 
     public async Task<Order?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Orders
+            .Include(o => o.Items)
+            .Include(o => o.Customer)
+            .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+    }
+
+    public async Task<Order?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Orders
             .Include(o => o.Items)
@@ -60,6 +68,33 @@ public class OrderRepository : IOrderRepository
 
         return (items, totalCount);
 
+    }
+
+    public async Task<(List<Order> Items, int TotalCount)> GetByCustomerPagedAsync(
+        Guid customerId, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        if (page < 1)
+            throw new ArgumentOutOfRangeException(nameof(page), "Page must be greater than or equal to 1.");
+        if (pageSize <= 0)
+            throw new ArgumentOutOfRangeException(nameof(pageSize), "Page size must be greater than 0.");
+
+        var query = _context.Orders
+            .Where(o => o.CustomerId == customerId)
+            .Include(o => o.Customer);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderByDescending(o => o.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
+    public async Task<bool> CustomerHasOrdersAsync(Guid customerId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Orders.AnyAsync(o => o.CustomerId == customerId, cancellationToken);
     }
 
     public async Task AddAsync(Order order, CancellationToken cancellationToken = default)
