@@ -9,6 +9,8 @@ public static class DataSeeder
 {
     public static async Task SeedAsync(ApplicationDbContext context)
     {
+        bool hasChanges = false;
+
         // Seed products if none exist
         if (!context.Products.Any())
         {
@@ -33,6 +35,7 @@ public static class DataSeeder
             };
 
             await context.Products.AddRangeAsync(products);
+            hasChanges = true;
         }
 
         // Seed customers if none exist
@@ -61,8 +64,12 @@ public static class DataSeeder
             };
 
             await context.Customers.AddRangeAsync(customers);
+            hasChanges = true;
         }
 
-        await context.SaveChangesAsync();
+        if (hasChanges)
+        {
+            await context.SaveChangesAsync();
+        }
     }
 }
