@@ -60,9 +60,9 @@ public class CreateCustomerCommandValidator : AbstractValidator<CreateCustomerCo
 
             RuleFor(x => x.Address.ZipCode)
                 .NotEmpty()
-                .WithMessage("Zip code is required")
-                .Matches(@"^\d{5}(-\d{4})?$")
-                .WithMessage("Invalid zip code format");
+                .WithMessage("Postal code is required")
+                .Matches(@"^[A-Za-z0-9\s\-]{3,20}$")
+                .WithMessage("Invalid postal code format");
 
             RuleFor(x => x.Address.Country)
                 .NotEmpty()
