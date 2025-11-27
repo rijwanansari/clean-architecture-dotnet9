@@ -1,0 +1,175 @@
+### Clean Architecture API - Products Endpoints
+### Base URL
+@baseUrl = https://localhost:7001/api
+@productId = {{createProduct.response.body.$}}
+
+### 1. Health Check
+GET {{baseUrl}}/../health
+Accept: application/json
+
+###
+
+### 2. Get All Products (Paginated)
+GET {{baseUrl}}/products?page=1&pageSize=10
+Accept: application/json
+
+###
+
+### 3. Create Product
+# @name createProduct
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Wireless Mouse",
+  "description": "Ergonomic wireless mouse with 2.4GHz connectivity",
+  "price": 29.99,
+  "currency": "USD",
+  "stockQuantity": 100,
+  "category": "Electronics"
+}
+
+###
+
+### 4. Get Product By ID
+GET {{baseUrl}}/products/{{productId}}
+Accept: application/json
+
+###
+
+### 5. Update Product
+PUT {{baseUrl}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "Wireless Mouse Pro",
+  "description": "Premium ergonomic wireless mouse with 2.4GHz connectivity and RGB lighting",
+  "price": 39.99,
+  "currency": "USD",
+  "category": "Electronics"
+}
+
+###
+
+### 6. Update Product Stock
+PATCH {{baseUrl}}/products/{{productId}}/stock
+Content-Type: application/json
+
+{
+  "quantity": 50
+}
+
+###
+
+### 7. Activate Product
+PATCH {{baseUrl}}/products/{{productId}}/activate
+
+###
+
+### 8. Deactivate Product
+PATCH {{baseUrl}}/products/{{productId}}/deactivate
+
+###
+
+### 9. Search Products
+GET {{baseUrl}}/products/search?searchTerm=mouse&page=1&pageSize=10
+Accept: application/json
+
+###
+
+### 10. Get Products By Category
+GET {{baseUrl}}/products/category/Electronics?page=1&pageSize=10
+Accept: application/json
+
+###
+
+### 11. Delete Product
+DELETE {{baseUrl}}/products/{{productId}}
+
+###
+
+### Sample: Create Multiple Products for Testing
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Mechanical Keyboard",
+  "description": "RGB mechanical gaming keyboard with Cherry MX switches",
+  "price": 129.99,
+  "currency": "USD",
+  "stockQuantity": 50,
+  "category": "Electronics"
+}
+
+###
+
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "USB-C Cable",
+  "description": "High-speed USB-C to USB-C cable, 6ft length",
+  "price": 14.99,
+  "currency": "USD",
+  "stockQuantity": 200,
+  "category": "Accessories"
+}
+
+###
+
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Laptop Stand",
+  "description": "Adjustable aluminum laptop stand for better ergonomics",
+  "price": 49.99,
+  "currency": "USD",
+  "stockQuantity": 75,
+  "category": "Accessories"
+}
+
+###
+
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Webcam HD",
+  "description": "1080p HD webcam with built-in microphone",
+  "price": 79.99,
+  "currency": "USD",
+  "stockQuantity": 30,
+  "category": "Electronics"
+}
+
+###
+
+### Edge Cases & Error Testing
+
+### Invalid Product ID (404)
+GET {{baseUrl}}/products/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+
+### Invalid Create Request (400 - Validation Error)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "",
+  "description": "Test",
+  "price": -10,
+  "currency": "INVALID",
+  "stockQuantity": -5,
+  "category": ""
+}
+
+###
+
+### Empty Search Term (400)
+GET {{baseUrl}}/products/search?searchTerm=&page=1
+Accept: application/json
+
+###
