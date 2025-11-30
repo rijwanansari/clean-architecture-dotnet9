@@ -1,0 +1,270 @@
+@page "/products"
+@rendermode InteractiveServer
+@using CleanArchitecture.Web.Services
+@using System.ComponentModel.DataAnnotations
+@inject ProductApiClient Api
+
+<h3>Products</h3>
+
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @_errorMessage
+        <button type="button" class="btn-close" @onclick="() => _errorMessage = null"></button>
+    </div>
+}
+
+<div class="mb-3 d-flex align-items-center gap-2">
+    <input class="form-control" placeholder="Search products..." @bind="_search" @bind:event="oninput" />
+    <button class="btn btn-primary" @onclick="Load">Search</button>
+    <button class="btn btn-success" @onclick="ShowCreate">New</button>
+</div>
+
+@if (_loading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Active</th>
+                <th style="width:180px"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in _items)
+            {
+                <tr>
+                    <td>@p.Name</td>
+                    <td>@p.Category</td>
+                    <td>@p.Price</td>
+                    <td>@p.StockQuantity</td>
+                    <td>@(p.IsActive ? "Yes" : "No")</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => Edit(p)">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => Delete(p.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <div>Showing page @_page</div>
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary" disabled="@(_page<=1)" @onclick="Prev">Prev</button>
+            <button class="btn btn-outline-secondary" disabled="@(!_hasMore)" @onclick="Next">Next</button>
+        </div>
+    </div>
+}
+
+@if (_showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" style="display: block;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <EditForm Model="_editModel" OnValidSubmit="Save">
+                    <DataAnnotationsValidator />
+                    <div class="modal-header">
+                        <h5 class="modal-title">@(_editModel.Id == Guid.Empty ? "Create Product" : "Edit Product")</h5>
+                        <button type="button" class="btn-close" @onclick="Hide" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ValidationSummary class="text-danger" />
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <InputText class="form-control" @bind-Value="_editModel.Name" />
+                            <ValidationMessage For="@(() => _editModel.Name)" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <InputTextArea class="form-control" rows="3" @bind-Value="_editModel.Description" />
+                            <ValidationMessage For="@(() => _editModel.Description)" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <InputText class="form-control" @bind-Value="_editModel.Category" />
+                            <ValidationMessage For="@(() => _editModel.Category)" />
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Price</label>
+                                <InputNumber class="form-control" @bind-Value="_editModel.Price" />
+                                <ValidationMessage For="@(() => _editModel.Price)" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Stock Quantity</label>
+                                <InputNumber class="form-control" @bind-Value="_editModel.StockQuantity" />
+                                <ValidationMessage For="@(() => _editModel.StockQuantity)" />
+                            </div>
+                        </div>
+                        @if (_editModel.Id != Guid.Empty)
+                        {
+                            <div class="form-check">
+                                <InputCheckbox class="form-check-input" id="isActive" @bind-Value="_editModel.IsActive" />
+                                <label class="form-check-label" for="isActive">Active</label>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="Hide">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    private List<ProductDto> _items = new();
+    private bool _loading;
+    private int _page = 1;
+    private const int PageSize = 10;
+    private bool _hasMore;
+    private string? _search;
+    private string? _errorMessage;
+
+    private EditProductModel _editModel = new();
+    private bool _showModal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        _loading = true;
+        _errorMessage = null;
+        try
+        {
+            var (items, total) = await Api.GetPagedAsync(_page, PageSize, _search);
+            _items = items.ToList();
+            _hasMore = total > _page * PageSize;
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error loading products: {ex.Message}";
+            _items.Clear();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void ShowCreate()
+    {
+        _editModel = new();
+        _showModal = true;
+    }
+
+    private void Edit(ProductDto dto)
+    {
+        _editModel = new()
+        {
+            Id = dto.Id,
+            Name = dto.Name,
+            Description = dto.Description,
+            Category = dto.Category,
+            Price = dto.Price,
+            StockQuantity = dto.StockQuantity,
+            IsActive = dto.IsActive
+        };
+        _showModal = true;
+    }
+
+    private async Task Save()
+    {
+        _errorMessage = null;
+        try
+        {
+            if (_editModel.Id == Guid.Empty)
+            {
+                var req = new CreateProductRequest(_editModel.Name!, _editModel.Description!, _editModel.Price, _editModel.StockQuantity, _editModel.Category!);
+                await Api.CreateAsync(req);
+            }
+            else
+            {
+                var req = new UpdateProductRequest(_editModel.Name!, _editModel.Description!, _editModel.Price, _editModel.StockQuantity, _editModel.Category!, _editModel.IsActive);
+                await Api.UpdateAsync(_editModel.Id, req);
+            }
+            _showModal = false;
+            await Load();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error saving product: {ex.Message}";
+            _showModal = false;
+        }
+    }
+
+    private async Task Delete(Guid id)
+    {
+        _errorMessage = null;
+        try
+        {
+            await Api.DeleteAsync(id);
+            await Load();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error deleting product: {ex.Message}";
+        }
+    }
+
+    private async Task Prev()
+    {
+        if (_page > 1)
+        {
+            _page--;
+            await Load();
+        }
+    }
+
+    private async Task Next()
+    {
+        if (_hasMore)
+        {
+            _page++;
+            await Load();
+        }
+    }
+
+    private void Hide() => _showModal = false;
+
+    private class EditProductModel
+    {
+        public Guid Id { get; set; }
+        
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(200, ErrorMessage = "Name cannot exceed 200 characters")]
+        public string? Name { get; set; }
+        
+        [Required(ErrorMessage = "Description is required")]
+        [StringLength(1000, ErrorMessage = "Description cannot exceed 1000 characters")]
+        public string? Description { get; set; }
+        
+        [Required(ErrorMessage = "Price is required")]
+        [Range(0.01, 1000000, ErrorMessage = "Price must be between 0.01 and 1,000,000")]
+        public decimal Price { get; set; }
+        
+        [Required(ErrorMessage = "Stock quantity is required")]
+        [Range(0, 100000, ErrorMessage = "Stock quantity must be between 0 and 100,000")]
+        public int StockQuantity { get; set; }
+        
+        [Required(ErrorMessage = "Category is required")]
+        [StringLength(100, ErrorMessage = "Category cannot exceed 100 characters")]
+        public string? Category { get; set; }
+        
+        public bool IsActive { get; set; } = true;
+    }
+}
